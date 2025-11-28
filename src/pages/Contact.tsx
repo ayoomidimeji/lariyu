@@ -18,7 +18,7 @@ const Contact = () => {
     e.preventDefault();
     
     // WhatsApp message
-    const whatsappNumber = "1234567890"; // Replace with actual number
+    const whatsappNumber = "+2348056756583"; // Replace with actual number
     const message = `Hello L'Riyu,\n\nName: ${formData.name}\nEmail: ${formData.email}\n\nMessage: ${formData.message}`;
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
@@ -97,7 +97,7 @@ const Contact = () => {
                     <p className="text-muted-foreground text-sm">
                       123 Luxury Avenue
                       <br />
-                      Fashion District, Italy
+                      Fashion District, Nigeria
                     </p>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ const Contact = () => {
                   <div>
                     <h3 className="font-semibold mb-1">Call Us</h3>
                     <p className="text-muted-foreground text-sm">
-                      +1 (234) 567-8900
+                      +234 805 675 6583
                     </p>
                   </div>
                 </div>
@@ -143,7 +143,7 @@ const Contact = () => {
                 variant="secondary"
                 className="w-full"
                 onClick={() =>
-                  window.open("https://wa.me/1234567890", "_blank")
+                  window.open("https://wa.me/+2348056756583", "_blank")
                 }
               >
                 Chat on WhatsApp

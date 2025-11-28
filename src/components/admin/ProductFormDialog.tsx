@@ -77,30 +77,32 @@ export const ProductFormDialog = ({
   });
 
   useEffect(() => {
-    if (product) {
-      form.reset({
-        name: product.name,
-        description: product.description || "",
-        price: product.price.toString(),
-        stock: product.stock.toString(),
-        category: product.category,
-        images: product.images.join(", "),
-        sizes: product.sizes.join(", "),
-        featured: product.featured,
-      });
-    } else {
-      form.reset({
-        name: "",
-        description: "",
-        price: "",
-        stock: "0",
-        category: "",
-        images: "",
-        sizes: "",
-        featured: false,
-      });
+    if (open) {
+      if (product) {
+        form.reset({
+          name: product.name,
+          description: product.description || "",
+          price: product.price.toString(),
+          stock: product.stock.toString(),
+          category: product.category,
+          images: product.images.join(", "),
+          sizes: product.sizes.join(", "),
+          featured: product.featured,
+        });
+      } else {
+        form.reset({
+          name: "",
+          description: "",
+          price: "",
+          stock: "0",
+          category: "",
+          images: "",
+          sizes: "",
+          featured: false,
+        });
+      }
     }
-  }, [product, form]);
+  }, [product, form, open]);
 
   const handleSubmit = async (data: ProductFormData) => {
     const formattedData = {

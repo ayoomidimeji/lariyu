@@ -3,24 +3,27 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn, getOptimizedImageUrl } from "@/lib/utils";
 
 interface ProductCardProps {
   id: string;
   name: string;
   price: number;
   images: string[];
+  width?: number;
+  height?: number;
 }
 
-export const ProductCard = ({ id, name, price, images }: ProductCardProps) => {
+export const ProductCard = ({ id, name, price, images, width = 400, height = 400 }: ProductCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     // Preload images
     images.forEach((src) => {
       const img = new Image();
-      img.src = src;
+      img.src = getOptimizedImageUrl(src, width, height);
     });
-  }, [images]);
+  }, [images, width, height]);
 
   const nextImage = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +42,7 @@ export const ProductCard = ({ id, name, price, images }: ProductCardProps) => {
     <Card className="overflow-hidden shadow-soft hover:shadow-elegant transition-luxury group">
       <div className="aspect-square overflow-hidden bg-muted relative">
         <img
-          src={images[currentImageIndex]}
+          src={getOptimizedImageUrl(images[currentImageIndex], width, height)}
           alt={`${name} - View ${currentImageIndex + 1}`}
           className="w-full h-full object-cover transition-all duration-500 ease-in-out"
         />

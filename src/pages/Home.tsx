@@ -1,6 +1,7 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import heroImage1 from "@/assets/hero-shoes.jpg";
 import heroImage2 from "@/assets/hero-shoes-2.jpg";
 import heroImage3 from "@/assets/hero-shoes-3.jpg";
@@ -12,9 +13,44 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { supabase } from "@/integrations/supabase/client";
+import { ProductCard } from "@/components/ProductCard";
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  images: string[];
+}
 
 const Home = () => {
   const heroImages = [heroImage1, heroImage2, heroImage3, heroImage4];
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedProducts();
+  }, []);
+
+  const fetchFeaturedProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .limit(4)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      if (data) {
+        setFeaturedProducts(data);
+      }
+    } catch (error) {
+      console.error("Error fetching featured products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -59,7 +95,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Featured Section */}
+      {/* Featured Section (Benefits) */}
       <section className="container mx-auto px-4 py-20">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-serif font-bold mb-4">
@@ -108,6 +144,44 @@ const Home = () => {
               Designed for comfort and elegance, ensuring steps that suit you.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Featured Collection Section */}
+      <section className="container mx-auto px-4 py-20 bg-secondary/30">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-serif font-bold mb-4">
+            Featured Collection
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Explore our latest arrivals, curated for the modern gentleman.
+          </p>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {featuredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                price={product.price}
+                images={product.images}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="text-center">
+          <Link to="/shop">
+            <Button variant="outline" size="lg" className="transition-luxury hover:bg-primary hover:text-primary-foreground">
+              View All Collection
+            </Button>
+          </Link>
         </div>
       </section>
 

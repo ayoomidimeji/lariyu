@@ -18,11 +18,7 @@ const About = () => {
               that combines artistry with comfort, luxury with practicality.
             </p>
             <p className="text-muted-foreground mb-4 leading-relaxed">
-              Each pair of L'Riyu shoes tells a story of dedication,
-              precision, and artisanal expertise. Our master craftsmen pour
-              their hearts into every stitch, ensuring that when you wear
-              L'Riyu, you're not just wearing shoes—you're wearing a piece of
-              art.
+              Behind every one of our shoes, there's a story of tradition, beauty, durability, comfort, and quality craftsmanship and each shoe carries with it the estimable wealth of knowledge and experience accumulated over years of practice and dedication
             </p>
           </section>
 
