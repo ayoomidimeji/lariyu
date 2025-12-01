@@ -81,7 +81,7 @@ const Footer = () => {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/riyu_shoes?igsh=MThkMzk1bXJ4dGxnNw=="
                 className="text-primary-foreground/80 hover:text-gold transition-luxury"
                 aria-label="Instagram"
               >
