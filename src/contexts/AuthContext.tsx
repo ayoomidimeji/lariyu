@@ -92,34 +92,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
-    const redirectUrl = `${window.location.origin}/email-confirmation`;
-
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          first_name: firstName,
-          last_name: lastName,
+    try {
+      const response = await fetch('http://localhost:3000/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      },
-    });
+        body: JSON.stringify({ email, password, firstName, lastName }),
+      });
 
-    if (error) {
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      toast({
+        title: "Account Created!",
+        description: "Please check your email for the confirmation link.",
+      });
+
+      return { error: null };
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Sign Up Failed",
         description: error.message,
       });
-    } else {
-      toast({
-        title: "Account Created!",
-        description: "Welcome! You can now start shopping.",
-      });
+      return { error };
     }
-
-    return { error };
   };
 
   const signOut = async () => {

@@ -1,6 +1,10 @@
 # L'Riyu Luxury Steps
 
-A premium e-commerce platform for luxury footwear, built with modern web technologies.
+**"Steps that suit you."**
+
+L'Riyu Luxury Steps is a premium e-commerce platform dedicated to handcrafted luxury footwear. Inspired by the legendary Italian shoemaking traditions, we offer a curated collection of shoes that blend timeless artistry with modern comfort and durability.
+
+Built with a cutting-edge tech stack including **React**, **TypeScript**, **Vite**, and **Supabase**, this project demonstrates a robust, secure, and responsive e-commerce application. It features a seamless shopping experience, from browsing our exclusive "Featured Collection" to a secure checkout process, all managed via a comprehensive Admin Dashboard.
 
 ## Features
 
