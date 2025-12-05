@@ -63,7 +63,7 @@ app.post('/api/signup', async (req, res) => {
                     first_name: firstName,
                     last_name: lastName,
                 },
-                redirectTo: 'http://localhost:8080/email-confirmation', // Adjust for production
+                redirectTo: 'https://lariyu.vercel.app/email-confirmation', // Adjust for production
             },
         });
 
