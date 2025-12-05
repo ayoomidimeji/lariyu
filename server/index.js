@@ -71,6 +71,7 @@ app.post('/api/signup', async (req, res) => {
 
         const { user, properties } = data;
         const confirmationLink = properties.action_link;
+        console.log("Generated Link: ", confirmationLink);
         // const confirmationLink = properties.email_otp; // if you want OTP
 
         // 2. Send Email with Nodemailer
