@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ShoppingCart, ArrowLeft, Loader2 } from "luc
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
+import { getOptimizedImageUrl } from "@/lib/utils";
 
 interface Product {
   id: string;
@@ -119,7 +120,7 @@ const ProductDetail = () => {
         <div className="space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden relative group">
             <img
-              src={product.images[currentImageIndex]}
+              src={getOptimizedImageUrl(product.images[currentImageIndex], 800, 800)}
               alt={`${product.name} - View ${currentImageIndex + 1}`}
               className="w-full h-full object-cover transition-all duration-500"
             />
@@ -156,12 +157,12 @@ const ProductDetail = () => {
                 key={index}
                 onClick={() => setCurrentImageIndex(index)}
                 className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === index
-                    ? "border-primary shadow-md"
-                    : "border-transparent hover:border-muted-foreground/20"
+                  ? "border-primary shadow-md"
+                  : "border-transparent hover:border-muted-foreground/20"
                   }`}
               >
                 <img
-                  src={image}
+                  src={getOptimizedImageUrl(image, 150, 150)}
                   alt={`${product.name} thumbnail ${index + 1}`}
                   className="w-full h-full object-cover"
                 />
