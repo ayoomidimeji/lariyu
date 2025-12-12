@@ -147,6 +147,12 @@ app.post('/api/signup', signupLimiter, async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+// Export the app for Vercel
+export default app;
+
+// Only listen if this file is run directly (not imported)
+if (process.argv[1] === __filename) {
+    app.listen(port, () => {
+        console.log(`Server running at http://localhost:${port}`);
+    });
+}
