@@ -153,7 +153,7 @@ CREATE POLICY "Users can view their own orders"
 
 CREATE POLICY "Users can create orders"
   ON public.orders FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = user_id AND status = 'pending');
 
 CREATE POLICY "Admins can view all orders"
   ON public.orders FOR SELECT
@@ -161,6 +161,10 @@ CREATE POLICY "Admins can view all orders"
 
 CREATE POLICY "Admins can update orders"
   ON public.orders FOR UPDATE
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete orders"
+  ON public.orders FOR DELETE
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- Order items policies
@@ -186,6 +190,10 @@ CREATE POLICY "Users can create order items for their orders"
 
 CREATE POLICY "Admins can view all order items"
   ON public.order_items FOR SELECT
+  USING (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Admins can delete order items"
+  ON public.order_items FOR DELETE
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- Create trigger function for updating updated_at
