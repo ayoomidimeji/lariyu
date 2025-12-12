@@ -16,8 +16,52 @@ const app = express();
 const port = 3000;
 
 // Middleware
-app.use(cors());
-app.use(express.json());
+import helmet from 'helmet';
+
+// Middleware
+
+// 1. Security Headers
+app.use(helmet());
+
+// 2. Stricter CORS
+const allowedOrigins = ['http://localhost:5173', 'https://lariyu.vercel.app'];
+app.use(cors({
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        // OR checks if the origin is in the allowed list
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true // Allow cookies/headers if needed
+}));
+
+// 3. Body Size Limits (prevent DoS)
+app.use(express.json({ limit: '10kb' }));
+
+// Rate Limiting
+import rateLimit from 'express-rate-limit';
+
+// Global Rate Limiter
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: 'Too many requests from this IP, please try again later.'
+});
+
+// Apply global limiter to all requests
+app.use(limiter);
+
+// Specific Limiter for Signup to prevent abuse
+const signupLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5, // Limit each IP to 5 signup requests per hour
+    message: 'Too many accounts created from this IP, please try again after an hour.'
+});
 
 // Initialize Supabase Admin Client
 // note: these should be in your .env file
@@ -45,7 +89,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-app.post('/api/signup', async (req, res) => {
+app.post('/api/signup', signupLimiter, async (req, res) => {
     const { email, password, firstName, lastName } = req.body;
 
     if (!email || !password) {
