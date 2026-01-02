@@ -17,6 +17,8 @@ dist-ssr
 supabase/full_schema.sql
 supabase/make_admin.sql
 
+server/test-rate-limit.js
+.gitignore
 
 
 # Editor directories and files
