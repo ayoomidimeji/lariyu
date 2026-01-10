@@ -20,6 +20,8 @@ import NotFound from "./pages/NotFound";
 import EmailConfirmation from "./pages/EmailConfirmation";
 import ForgotPassword from "./pages/ForgotPassword";
 import UpdatePassword from "./pages/UpdatePassword";
+import ScrollToTop from "./components/ScrollToTop";
+
 
 const queryClient = new QueryClient();
 
@@ -57,6 +59,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <ScrollToTop />
         <AuthProvider>
           <CartProvider>
             <AppContent />
