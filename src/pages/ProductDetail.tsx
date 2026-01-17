@@ -5,7 +5,8 @@ import { ChevronLeft, ChevronRight, ShoppingCart, ArrowLeft, Loader2 } from "luc
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { getOptimizedImageUrl } from "@/lib/utils";
+import { OptimizedImage } from "@/components/OptimizedImage";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 interface Product {
   id: string;
@@ -24,6 +25,7 @@ const ProductDetail = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
   const { addToCart } = useCart();
+  const { quality } = useNetworkStatus();
 
   useEffect(() => {
     if (id) {
@@ -119,10 +121,14 @@ const ProductDetail = () => {
         {/* Image Gallery */}
         <div className="space-y-4">
           <div className="aspect-square bg-muted rounded-lg overflow-hidden relative group">
-            <img
-              src={getOptimizedImageUrl(product.images[currentImageIndex], 800, 800)}
+            <OptimizedImage
+              src={product.images[currentImageIndex]}
               alt={`${product.name} - View ${currentImageIndex + 1}`}
-              className="w-full h-full object-cover transition-all duration-500"
+              width={800}
+              height={800}
+              quality={quality}
+              priority={true}
+              className="transition-all duration-500"
             />
             {/* Navigation Buttons */}
             <div className="absolute inset-0 flex items-center justify-between p-4">
@@ -161,10 +167,13 @@ const ProductDetail = () => {
                   : "border-transparent hover:border-muted-foreground/20"
                   }`}
               >
-                <img
-                  src={getOptimizedImageUrl(image, 150, 150)}
+                <OptimizedImage
+                  src={image}
                   alt={`${product.name} thumbnail ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  width={150}
+                  height={150}
+                  quality={quality}
+                  priority={index < 4}
                 />
               </button>
             ))}

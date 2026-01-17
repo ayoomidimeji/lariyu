@@ -11,6 +11,7 @@ import slowDown from 'express-slow-down';
 import RedisStore from 'rate-limit-redis';
 import { createClient as createRedisClient } from 'redis';
 import crypto from 'crypto';
+import xss from 'xss';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,7 +99,7 @@ const generateFingerprint = (req) => {
         req.headers['accept-encoding'] || '',
         req.ip || '',
     ].join('|');
-    
+
     return crypto.createHash('sha256').update(components).digest('hex').substring(0, 16);
 };
 
@@ -150,6 +151,54 @@ app.use(cors({
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
+// 5. Global Sanitization Middleware
+const sanitizePayload = (data) => {
+    if (typeof data === 'string') {
+        return xss(data);
+    }
+    if (Array.isArray(data)) {
+        return data.map(item => sanitizePayload(item));
+    }
+    if (data !== null && typeof data === 'object') {
+        return Object.keys(data).reduce((acc, key) => {
+            acc[key] = sanitizePayload(data[key]);
+            return acc;
+        }, {});
+    }
+    return data;
+};
+
+const sanitizeMiddleware = (req, res, next) => {
+    if (req.body) req.body = sanitizePayload(req.body);
+    if (req.query) {
+        const sanitized = sanitizePayload(req.query);
+        try {
+            req.query = sanitized;
+        } catch (error) {
+            Object.defineProperty(req, 'query', {
+                value: sanitized,
+                writable: true,
+                configurable: true
+            });
+        }
+    }
+    if (req.params) {
+        const sanitized = sanitizePayload(req.params);
+        try {
+            req.params = sanitized;
+        } catch (error) {
+            Object.defineProperty(req, 'params', {
+                value: sanitized,
+                writable: true,
+                configurable: true
+            });
+        }
+    }
+    next();
+};
+
+app.use(sanitizeMiddleware);
+
 // ============================================
 // RATE LIMITING CONFIGURATION
 // ============================================
@@ -163,10 +212,10 @@ const rateLimitHandler = (req, res) => {
         current: req.rateLimit?.current,
         remaining: req.rateLimit?.remaining,
     });
-    
+
     // Ensure headers are set
     res.setHeader('Retry-After', Math.ceil((req.rateLimit?.resetTime?.getTime() - Date.now()) / 1000) || 60);
-    
+
     res.status(429).json({
         error: 'Too many requests',
         message: 'Please try again later',
@@ -314,10 +363,8 @@ const validateEmail = (email) => {
     return emailRegex.test(email);
 };
 
-const sanitizeInput = (input) => {
-    if (typeof input !== 'string') return input;
-    return input.trim().replace(/[<>]/g, '');
-};
+// sanitizeInput is now redundant due to global middleware, but keeping specific trim/formatting if needed
+// const sanitizeInput = (input) => { ... };
 
 // ============================================
 // ROUTES
@@ -325,8 +372,8 @@ const sanitizeInput = (input) => {
 
 // Health check endpoint (no rate limiting)
 app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
+    res.json({
+        status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         redis: redisClient?.isOpen ? 'connected' : 'disconnected'
@@ -352,56 +399,57 @@ app.get('/api/test-rate-limit', (req, res) => {
 });
 
 // Signup endpoint with all protections
-app.post('/api/signup', 
-    signupSlowDown, 
-    signupLimiter, 
-    emailSignupLimiter, 
-    deviceSignupLimiter, 
+app.post('/api/signup',
+    signupSlowDown,
+    signupLimiter,
+    emailSignupLimiter,
+    deviceSignupLimiter,
     async (req, res) => {
         const startTime = Date.now();
-        
+
         try {
-            // 1. Extract and sanitize inputs
+            // 1. Extract and sanitize inputs (already sanitized by global middleware, just applying formatting)
             let { email, password, firstName, lastName } = req.body;
-            
-            email = sanitizeInput(email)?.toLowerCase();
-            firstName = sanitizeInput(firstName);
-            lastName = sanitizeInput(lastName);
-            
+
+            // Apply specific formatting
+            email = email?.trim().toLowerCase();
+            firstName = firstName?.trim();
+            lastName = lastName?.trim();
+
             // 2. Validate required fields
             if (!email || !password) {
-                return res.status(400).json({ 
-                    error: 'Email and password are required' 
+                return res.status(400).json({
+                    error: 'Email and password are required'
                 });
             }
-            
+
             // 3. Validate email format
             if (!validateEmail(email)) {
-                return res.status(400).json({ 
-                    error: 'Invalid email format' 
+                return res.status(400).json({
+                    error: 'Invalid email format'
                 });
             }
-            
+
             // 4. Validate password strength
             if (password.length < 8) {
-                return res.status(400).json({ 
-                    error: 'Password must be at least 8 characters' 
+                return res.status(400).json({
+                    error: 'Password must be at least 8 characters'
                 });
             }
-            
+
             // 5. Validate name fields
             if (firstName && firstName.length > 50) {
-                return res.status(400).json({ 
-                    error: 'First name is too long' 
+                return res.status(400).json({
+                    error: 'First name is too long'
                 });
             }
-            
+
             if (lastName && lastName.length > 50) {
-                return res.status(400).json({ 
-                    error: 'Last name is too long' 
+                return res.status(400).json({
+                    error: 'Last name is too long'
                 });
             }
-            
+
             // 6. Generate Signup Link using Admin API
             const { data, error } = await supabase.auth.admin.generateLink({
                 type: 'signup',
@@ -415,27 +463,27 @@ app.post('/api/signup',
                     redirectTo: process.env.REDIRECT_URL || 'https://lariyu.vercel.app/email-confirmation',
                 },
             });
-            
+
             if (error) {
-                logger.error('Supabase signup error', { 
-                    error: error.message, 
+                logger.error('Supabase signup error', {
+                    error: error.message,
                     email,
-                    code: error.code 
+                    code: error.code
                 });
-                
+
                 // Handle specific errors
                 if (error.message.includes('already registered')) {
-                    return res.status(409).json({ 
-                        error: 'Email already registered' 
+                    return res.status(409).json({
+                        error: 'Email already registered'
                     });
                 }
-                
+
                 throw error;
             }
-            
+
             const { properties } = data;
             const confirmationLink = properties.action_link;
-            
+
             // 7. Send Email with Nodemailer
             const mailOptions = {
                 from: `"Lariyu Luxury Steps" <${process.env.GMAIL_USER}>`,
@@ -466,32 +514,32 @@ app.post('/api/signup',
                     </div>
                 `,
             };
-            
+
             await transporter.sendMail(mailOptions);
-            
+
             const duration = Date.now() - startTime;
-            logger.info('Signup successful', { 
-                email, 
+            logger.info('Signup successful', {
+                email,
                 duration,
-                ip: req.ip 
+                ip: req.ip
             });
-            
-            res.json({ 
+
+            res.json({
                 message: 'Confirmation email sent successfully',
-                email: email 
+                email: email
             });
-            
+
         } catch (err) {
             const duration = Date.now() - startTime;
-            logger.error('Signup error', { 
-                error: err.message, 
+            logger.error('Signup error', {
+                error: err.message,
                 stack: err.stack,
                 duration,
-                ip: req.ip 
+                ip: req.ip
             });
-            
-            res.status(500).json({ 
-                error: 'Error processing signup. Please try again later.' 
+
+            res.status(500).json({
+                error: 'Error processing signup. Please try again later.'
             });
         }
     }
@@ -508,14 +556,14 @@ app.use((req, res) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-    logger.error('Unhandled error', { 
-        error: err.message, 
+    logger.error('Unhandled error', {
+        error: err.message,
         stack: err.stack,
-        path: req.path 
+        path: req.path
     });
-    
-    res.status(err.status || 500).json({ 
-        error: 'Internal server error' 
+
+    res.status(err.status || 500).json({
+        error: 'Internal server error'
     });
 });
 
@@ -524,12 +572,12 @@ app.use((err, req, res, next) => {
 // ============================================
 const gracefulShutdown = async (signal) => {
     logger.info(`${signal} received, starting graceful shutdown`);
-    
+
     if (redisClient) {
         await redisClient.quit();
         logger.info('Redis connection closed');
     }
-    
+
     process.exit(0);
 };
 

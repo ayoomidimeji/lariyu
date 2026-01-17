@@ -1,75 +1,147 @@
-# L'Riyu Luxury Steps
+# Lariyu Luxury Steps
 
-**"Steps that suit you."**
+A premium e-commerce platform for luxury footwear, built with a modern stack focusing on performance, security, and aesthetics.
 
-L'Riyu Luxury Steps is a premium e-commerce platform dedicated to handcrafted luxury footwear. Inspired by the legendary Italian shoemaking traditions, we offer a curated collection of shoes that blend timeless artistry with modern comfort and durability.
+![Lariyu Luxury Steps Banner](public/og-image.png)
 
-Built with a cutting-edge tech stack including **React**, **TypeScript**, **Vite**, and **Supabase**, this project demonstrates a robust, secure, and responsive e-commerce application. It features a seamless shopping experience, from browsing our exclusive "Featured Collection" to a secure checkout process, all managed via a comprehensive Admin Dashboard.
+## 🚀 Overview
 
-## Features
+Lariyu Luxury Steps is a full-stack application combining a high-performance React frontend with a secure Express backend. It features robust authentication, real-time database interactions, and sophisticated user interface components.
 
-- **User Authentication**: Secure sign-up and sign-in functionality using Supabase Auth.
-- **Product Catalog**: Browse a curated collection of luxury shoes with filtering and detailed views.
-- **Shopping Cart**: Add items to cart, manage quantities, and review totals.
-- **Checkout Process**: Streamlined checkout with delivery details and order summary.
-- **Admin Dashboard**: Comprehensive admin panel to manage products (CRUD) and view/update order statuses.
-- **Responsive Design**: Fully responsive interface optimized for desktop, tablet, and mobile devices.
-- **Secure Backend**: Row Level Security (RLS) policies ensure data privacy and integrity.
+### Key Features
+*   **Premium UI/UX**: Built with React, TailwindCSS, and Radix UI for accessible, stunning components.
+*   **Secure Authentication**: Supabase Auth integration with custom email verification flows.
+*   **Robust Backend**: Express server with comprehensive security measures:
+    *   **Rate Limiting**: Multi-layer protection (Global, IP, Email, Device) using Redis.
+    *   **Input Sanitization**: Global middleware to prevent XSS attacks using `xss` library.
+    *   **Security Headers**: Implementation of Helmet for CSP and HSTS.
+    *   **Bot Protection**: Exponential backoff (Slow Down) for sensitive endpoints.
+*   **Database**: Supabase (PostgreSQL) for reliable data storage and real-time capabilities.
+*   **Email Service**: Nodemailer integration for transactional emails.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: React, TypeScript, Vite
-- **Styling**: Tailwind CSS, Shadcn UI
-- **Backend**: Supabase (PostgreSQL, Auth, Realtime)
-- **State Management**: React Context API
-- **Routing**: React Router DOM
+### Frontend
+*   **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
+*   **Language**: TypeScript
+*   **Styling**: [TailwindCSS](https://tailwindcss.com/)
+*   **Components**: [Radix UI](https://www.radix-ui.com/) / [shadcn/ui](https://ui.shadcn.com/)
+*   **State/Data**: React Query (@tanstack/react-query)
+*   **Routing**: React Router DOM
 
-## Getting Started
+### Backend
+*   **Server**: Node.js + Express
+*   **Database**: Supabase (PostgreSQL)
+*   **Caching/Rate Limiting**: Redis
+*   **Security**: Helmet, XSS, Express Rate Limit
+*   **Email**: Nodemailer
+
+## 📦 Installation & Setup
 
 ### Prerequisites
+*   Node.js (v18+ recommended)
+*   pnpm (v9+ recommended)
+*   Redis (optional, for production-grade rate limiting)
 
-- Node.js (v16 or higher)
-- npm or bun
+### 1. Clone the repository
+```bash
+git clone https://github.com/your-username/lriyu-luxury-steps.git
+cd lriyu-luxury-steps
+```
 
-### Installation
+### 2. Install Dependencies
+This project uses a unified package structure. Install dependencies from the root:
+```bash
+pnpm install
+```
 
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd lriyu-luxury-steps
-   ```
+### 3. Environment Configuration
+Create a `.env` file in the root directory. You can use `.env.example` as a reference if available.
 
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   bun install
-   ```
+**Required Variables:**
+```env
+# Server Configuration
+PORT=3000
+NODE_ENV=development
 
-3. Set up Environment Variables:
-   Create a `.env` file in the root directory and add your Supabase credentials:
-   ```env
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
-   ```
+# Supabase Configuration
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+# Email Service (Gmail Example)
+GMAIL_USER=your_email@gmail.com
+GMAIL_APP_PASSWORD=your_app_specific_password
 
-## Project Structure
+# Optional: Rate Limiting (Redis)
+# If not provided, server defaults to in-memory store
+REDIS_URL=redis://localhost:6379
 
-- `src/components`: Reusable UI components
-- `src/pages`: Application pages (Home, Shop, Admin, etc.)
-- `src/contexts`: React Context providers (AuthContext, etc.)
-- `src/hooks`: Custom React hooks
-- `src/integrations/supabase`: Supabase client and types
-- `supabase/migrations`: Database schema and RLS policies
+# Ops
+REDIRECT_URL=http://localhost:5173/email-confirmation
+ADDITIONAL_ALLOWED_ORIGINS=http://localhost:5173,https://your-production-domain.com
+```
 
-## Security
+### 4. Running the Application
 
-This project uses Supabase Row Level Security (RLS) to protect data.
-- User profiles are only editable by the user.
-- Orders are only visible to the user who placed them (and admins).
-- Product management is restricted to users with the 'admin' role.
+**Development (Frontend + Backend)**
+It's recommended to run frontend and backend in separate terminals for easier log monitoring.
+
+Terminal 1 (Frontend):
+```bash
+pnpm dev
+```
+
+Terminal 2 (Backend):
+```bash
+pnpm server
+```
+
+The frontend will start at `http://localhost:5173` and the backend at `http://localhost:3000`.
+
+## 🔒 Security Measures
+
+### Input Sanitization
+A global middleware automatically sanitizes `req.body`, `req.query`, and `req.params` to strip malicious scripts, preventing Cross-Site Scripting (XSS) via the `xss` library.
+
+### Rate Limiting Strategies
+*   **Global Limit**: 300 requests / 15 mins.
+*   **Signup IP Limit**: 5 accounts / hour per IP.
+*   **Signup Email Limit**: 3 attempts / hour per email.
+*   **Signup Device Limit**: 5 attempts / hour per device fingerprint.
+*   **Slow Down**: Delays responses after 2 consecutive requests to `signup`.
+
+### SQL Injection
+Protected via Supabase's parameterized queries options.
+
+## 🧪 Testing
+
+The backend includes verification scripts for security features.
+
+```bash
+# Verify Sanitization
+node server/test-sanitization.js
+
+# Verify Rate Limiting
+node server/test-rate-limit.js
+```
+
+## 📂 Project Structure
+
+```
+├── public/              # Static assets
+├── server/              # Express backend code
+│   ├── index.js         # Main server entry point
+│   ├── test-*.js        # Security verification scripts
+├── src/                 # React frontend code
+│   ├── components/      # Reusable UI components
+│   ├── pages/           # Application routes/pages
+│   ├── hooks/           # Custom React hooks
+│   └── lib/             # Utilities (Supabase client, utils)
+├── .env                 # Environment variables (do not commit)
+├── package.json         # Project dependencies and scripts
+└── vite.config.ts       # Vite configuration
+```
+
+## 📄 License
+Private (Proprietary). All rights reserved.
