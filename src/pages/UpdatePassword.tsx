@@ -29,29 +29,23 @@ type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>;
 
 const UpdatePassword = () => {
     const [isLoading, setIsLoading] = useState(false);
+    const [isSuccess, setIsSuccess] = useState(false);
     const { toast } = useToast();
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Check if we have a session (the link should automatically log the user in lightly for the update)
-        // or if we are just checking for recovery parameters in the URL
+        // Double check if we have a valid session for password update
         supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-                // Optionally handle the case where the link is invalid or expired
-                // For now, we'll let the Supabase client handle the internal state from the hash fragment
+            if (!session && !isSuccess) {
+                toast({
+                    variant: "destructive",
+                    title: "Session Expired",
+                    description: "Requested password reset link is invalid or has expired.",
+                });
+                navigate("/auth");
             }
         });
-
-        const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event == "PASSWORD_RECOVERY") {
-                // User is in the process of recovering their password
-            }
-        });
-
-        return () => {
-            authListener.subscription.unsubscribe();
-        }
-    }, []);
+    }, [navigate, toast, isSuccess]);
 
     const form = useForm<UpdatePasswordFormData>({
         resolver: zodResolver(updatePasswordSchema),
@@ -74,11 +68,12 @@ const UpdatePassword = () => {
 
             toast({
                 title: "Password Updated",
-                description: "Your password has been changed successfully. You can now log in.",
+                description: "Your password has been changed successfully. Please log in with your new password.",
             });
 
-            // Redirect to login or home
-            navigate("/auth");
+            // Sign out to clear the recovery session and set success state
+            await supabase.auth.signOut();
+            setIsSuccess(true);
         } catch (error: any) {
             console.error("Update password error:", error);
             toast({
@@ -95,51 +90,70 @@ const UpdatePassword = () => {
         <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[80vh]">
             <Card className="w-full max-w-md shadow-elegant">
                 <CardHeader>
-                    <CardTitle className="font-serif text-3xl text-center">Set New Password</CardTitle>
+                    <CardTitle className="font-serif text-3xl text-center">
+                        {isSuccess ? "Password Reset" : "Set New Password"}
+                    </CardTitle>
                     <CardDescription className="text-center">
-                        Type your new robust password below.
+                        {isSuccess 
+                            ? "Your password has been updated successfully." 
+                            : "Type your new robust password below."}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>New Password</FormLabel>
-                                        <FormControl>
-                                            <Input type="password" placeholder="••••••" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="confirmPassword"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Confirm Password</FormLabel>
-                                        <FormControl>
-                                            <Input type="password" placeholder="••••••" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <Button
-                                type="submit"
+                    {isSuccess ? (
+                        <div className="space-y-6 text-center">
+                            <div className="bg-green-50 text-green-700 p-4 rounded-lg">
+                                <p className="font-medium">Success!</p>
+                                <p className="text-sm mt-1">You can now use your new password to sign in to your account.</p>
+                            </div>
+                            <Button 
+                                onClick={() => navigate("/auth")} 
                                 className="w-full transition-luxury"
-                                disabled={isLoading}
                             >
-                                {isLoading ? "Updating..." : "Update Password"}
+                                Back to Login
                             </Button>
-                        </form>
-                    </Form>
+                        </div>
+                    ) : (
+                        <Form {...form}>
+                            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                                <FormField
+                                    control={form.control}
+                                    name="password"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>New Password</FormLabel>
+                                            <FormControl>
+                                                <Input type="password" placeholder="••••••" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <FormField
+                                    control={form.control}
+                                    name="confirmPassword"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Confirm Password</FormLabel>
+                                            <FormControl>
+                                                <Input type="password" placeholder="••••••" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+
+                                <Button
+                                    type="submit"
+                                    className="w-full transition-luxury"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? "Updating..." : "Update Password"}
+                                </Button>
+                            </form>
+                        </Form>
+                    )}
                 </CardContent>
             </Card>
         </div>

@@ -38,8 +38,9 @@ const ForgotPassword = () => {
     const onSubmit = async (data: ForgotPasswordFormData) => {
         setIsLoading(true);
         try {
-            // In a production environment, you would ensure the redirect URL points to your actual domain
-            const redirectUrl = `${window.location.origin}/update-password`;
+            // Ensure the redirect URL correctly points to the update-password page
+            const redirectUrl = window.location.origin.replace(/\/$/, '') + "/update-password";
+            console.log("Password reset redirect URL:", redirectUrl);
 
             const { error } = await supabase.auth.resetPasswordForEmail(data.email, {
                 redirectTo: redirectUrl,

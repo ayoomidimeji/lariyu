@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -21,21 +22,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
-        // Check admin status
         if (session?.user) {
           setTimeout(() => {
             checkAdminStatus(session.user.id);
           }, 0);
         } else {
           setIsAdmin(false);
+        }
+
+        // Handle password recovery redirection
+        const isRecovery = event === "PASSWORD_RECOVERY" || 
+                          window.location.hash.includes("type=recovery");
+        
+        if (isRecovery) {
+          console.log("Password recovery detected, redirecting to update-password");
+          toast({
+            title: "Reset Password",
+            description: "Please set your new password.",
+          });
+          navigate("/update-password");
         }
       }
     );

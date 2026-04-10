@@ -21,6 +21,7 @@ server/test-rate-limit.js
 server/test-sanitization.js
 .gitignore
 
+linkedinposts.md
 
 # Editor directories and files
 .vscode/*

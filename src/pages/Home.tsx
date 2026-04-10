@@ -92,6 +92,16 @@ const Home = () => {
               <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </Link>
+
+          <div className="mt-12 max-w-2xl mx-auto glass-morphism rounded-2xl p-8 animate-fade-in delay-500">
+            <p className="text-lg md:text-xl font-serif leading-relaxed opacity-90 mb-4">
+              "Behind every one of our shoes, lies a story of tradition, beauty, and quality, and each shoe carries with it an inestimable wealth of knowledge and experience accumulated through practice and dedication."
+            </p>
+            <div className="h-px w-24 bg-gold/50 mx-auto mb-4" />
+            <p className="text-xl md:text-2xl font-serif font-bold text-gold italic">
+              We don't just craft, we walk with you!
+            </p>
+          </div>
         </div>
       </section>
 

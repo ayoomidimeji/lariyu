@@ -320,7 +320,7 @@ const Checkout = () => {
                                 <Label htmlFor="normal" className="flex-1 cursor-pointer">
                                   <div className="font-semibold">Normal Delivery (₦5,000)</div>
                                   <div className="text-sm text-muted-foreground">
-                                    Delivery within 7 days
+                                    Delivery within 14 days
                                   </div>
                                 </Label>
                               </div>
@@ -329,7 +329,7 @@ const Checkout = () => {
                                 <Label htmlFor="express" className="flex-1 cursor-pointer">
                                   <div className="font-semibold">Express Delivery (₦10,000)</div>
                                   <div className="text-sm text-muted-foreground">
-                                    Delivery within 3 days
+                                    Delivery within 7 days
                                   </div>
                                 </Label>
                               </div>
