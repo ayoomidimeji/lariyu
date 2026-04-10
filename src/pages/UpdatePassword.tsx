@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,6 +31,8 @@ type UpdatePasswordFormData = z.infer<typeof updatePasswordSchema>;
 const UpdatePassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { toast } = useToast();
     const navigate = useNavigate();
 
@@ -123,7 +126,20 @@ const UpdatePassword = () => {
                                         <FormItem>
                                             <FormLabel>New Password</FormLabel>
                                             <FormControl>
-                                                <Input type="password" placeholder="••••••" {...field} />
+                                                <div className="relative">
+                                                    <Input type={showPassword ? "text" : "password"} placeholder="••••••" {...field} />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowPassword(!showPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                                                    >
+                                                        {showPassword ? (
+                                                            <EyeOff className="h-4 w-4" />
+                                                        ) : (
+                                                            <Eye className="h-4 w-4" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -137,7 +153,20 @@ const UpdatePassword = () => {
                                         <FormItem>
                                             <FormLabel>Confirm Password</FormLabel>
                                             <FormControl>
-                                                <Input type="password" placeholder="••••••" {...field} />
+                                                <div className="relative">
+                                                    <Input type={showConfirmPassword ? "text" : "password"} placeholder="••••••" {...field} />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                                                    >
+                                                        {showConfirmPassword ? (
+                                                            <EyeOff className="h-4 w-4" />
+                                                        ) : (
+                                                            <Eye className="h-4 w-4" />
+                                                        )}
+                                                    </button>
+                                                </div>
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

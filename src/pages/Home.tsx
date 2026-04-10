@@ -15,6 +15,25 @@ import {
 import Autoplay from "embla-carousel-autoplay";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/ProductCard";
+import SEO from "@/components/SEO";
+
+const organizationData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "L'Riyu Luxury Steps",
+  "url": "https://lariyu.vercel.app",
+  "logo": "https://lariyu.vercel.app/og-image.png",
+  "description": "Premium handcrafted luxury shoes with Italian craftsmanship.",
+  "sameAs": [
+    "https://twitter.com/LRiyu",
+    "https://instagram.com/LRiyu"
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": "+234-800-000-0000",
+    "contactType": "customer service"
+  }
+};
 
 interface Product {
   id: string;
@@ -54,6 +73,11 @@ const Home = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO 
+        title="Luxury Handcrafted Shoes"
+        description="Explore the finest collection of handcrafted luxury shoes from L'Riyu. Each pair is a masterpiece of Italian-inspired precision and premium materials."
+        structuredData={organizationData}
+      />
       {/* Hero Section */}
       <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
         <Carousel

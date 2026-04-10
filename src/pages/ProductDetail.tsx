@@ -7,6 +7,7 @@ import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import SEO from "@/components/SEO";
 
 interface Product {
   id: string;
@@ -106,8 +107,34 @@ const ProductDetail = () => {
     "Elegant design"
   ];
 
+  const productData = product ? {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "image": product.images,
+    "description": product.description || `Luxury handcrafted ${product.name} from L'Riyu.`,
+    "offers": {
+      "@type": "Offer",
+      "url": window.location.href,
+      "priceCurrency": "NGN",
+      "price": product.price,
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "L'Riyu Luxury Steps"
+      }
+    }
+  } : undefined;
+
   return (
     <div className="container mx-auto px-4 py-12">
+      <SEO 
+        title={product.name}
+        description={product.description || `Discover the luxury and craftsmanship of ${product.name} at L'Riyu.`}
+        ogType="product"
+        ogImage={product.images[0]}
+        structuredData={productData}
+      />
       {/* Back Button */}
       <Link
         to="/shop"

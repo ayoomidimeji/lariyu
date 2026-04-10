@@ -4,6 +4,11 @@ import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO";
+import { ProductCardSkeleton } from "@/components/ProductCardSkeleton";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
+import { useRef } from "react";
 
 interface Product {
   id: string;
@@ -23,6 +28,35 @@ const Shop = () => {
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const { toast } = useToast();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    // Initial mount animations
+    gsap.fromTo(
+      ".header-anim",
+      { y: -30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, ease: "power3.out" }
+    );
+    gsap.fromTo(
+      ".filters-anim",
+      { y: 30, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.8, delay: 0.2, ease: "power3.out" }
+    );
+  }, { scope: containerRef });
+
+  useGSAP(() => {
+    // Animate products when loading finishes or category changes
+    if (!loading && products.length > 0) {
+      gsap.from(".product-card-anim", {
+        y: 50,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power3.out",
+        clearProps: "all"
+      });
+    }
+  }, { dependencies: [loading, products.length, selectedCategory], scope: containerRef });
 
   useEffect(() => {
     fetchCategories();
@@ -106,8 +140,12 @@ const Shop = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <header className="text-center mb-12">
+    <div className="container mx-auto px-4 py-12" ref={containerRef}>
+      <SEO 
+        title="Shop Luxury Collection"
+        description="Browse our exclusive collection of handcrafted luxury shoes. From formal elegance to casual sophistication, discover the perfect pair at L'Riyu."
+      />
+      <header className="text-center mb-12 header-anim">
         <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">
           Our Collection
         </h1>
@@ -117,7 +155,7 @@ const Shop = () => {
       </header>
 
       {/* Filters */}
-      <div className="flex justify-center gap-4 mb-12 flex-wrap">
+      <div className="flex justify-center gap-4 mb-12 flex-wrap filters-anim">
         <Button
           variant={selectedCategory === "all" ? "default" : "outline"}
           onClick={() => setSelectedCategory("all")}
@@ -140,22 +178,24 @@ const Shop = () => {
       {/* Product Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mb-12">
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            id={product.id}
-            name={product.name}
-            price={product.price}
-            images={product.images}
-          />
+          <div key={product.id} className="product-card-anim">
+            <ProductCard
+              id={product.id}
+              name={product.name}
+              price={product.price}
+              images={product.images}
+            />
+          </div>
         ))}
+        {/* Loading State (Skeleton Grid) */}
+        {loading && (
+          Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+            <ProductCardSkeleton key={`skeleton-${i}`} />
+          ))
+        )}
       </div>
 
-      {/* Loading State */}
-      {loading && (
-        <div className="flex justify-center mb-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      )}
+      {/* Loading State handled above in grid */}
 
       {/* Empty State */}
       {!loading && products.length === 0 && (

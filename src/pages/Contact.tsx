@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import SEO from "@/components/SEO";
 
 const Contact = () => {
   const { toast } = useToast();
@@ -34,6 +35,10 @@ const Contact = () => {
 
   return (
     <div className="container mx-auto px-4 py-12">
+      <SEO 
+        title="Contact Us" 
+        description="Have questions about our luxury handcrafted shoes? Get in touch with L'Riyu. We're here to assist you with inquiries, orders, and customized steps."
+      />
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-serif font-bold mb-8 text-center">
           Contact Us

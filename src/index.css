@@ -159,4 +159,23 @@ All colors MUST be HSL.
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
+
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes luxury-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .animate-luxury-pulse {
+    animation: luxury-pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
 }

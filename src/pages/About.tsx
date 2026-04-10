@@ -1,6 +1,12 @@
+import SEO from "@/components/SEO";
+
 const About = () => {
   return (
     <div className="container mx-auto px-4 py-12">
+      <SEO 
+        title="Our Story & Craftsmanship" 
+        description="Discover the passion, tradition, and craftsmanship behind L'Riyu. Learn about our commitment to Italian shoemaking excellence and premium materials."
+      />
       <div className="max-w-4xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-serif font-bold mb-8 text-center">
           About L'Riyu

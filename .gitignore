@@ -14,6 +14,8 @@ dist-ssr
 *.local
 .env
 
+20260410153500_rls_policies.sql
+
 supabase/full_schema.sql
 supabase/make_admin.sql
 
